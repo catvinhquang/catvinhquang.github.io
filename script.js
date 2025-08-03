@@ -277,6 +277,9 @@ function openRestaurantDetails(restaurantId, clickedElement = null) {
         <button class="order-btn">Đặt món ngay</button>
     `;
     
+    // Setup scroll event isolation
+    setupDetailViewScrollHandling(detailsView);
+    
     if (animatingImage) {
         animateRestaurantThumbnail(animatingImage, detailsView);
     } else {
@@ -317,6 +320,9 @@ function animateRestaurantThumbnail(originalImage, detailsView) {
     
     // Show detail view with special animation class
     detailsView.classList.add('appearing');
+    
+    // Prevent body scroll when detail view is open
+    document.body.style.overflow = 'hidden';
     
     // Animate the cloned image
     requestAnimationFrame(() => {
@@ -369,6 +375,10 @@ function closeRestaurantDetails() {
     detailsView.classList.remove('active');
     detailsView.classList.remove('appearing');
     detailsView.classList.remove('filled');
+    
+    // Restore body scroll
+    document.body.style.overflow = '';
+    
     currentRestaurant = null;
 }
 
@@ -654,6 +664,32 @@ function setupScrollAnimation() {
     restaurantCards.forEach(card => {
         window.restaurantObserver.observe(card);
     });
+}
+
+// Setup scroll event handling for detail view
+function setupDetailViewScrollHandling(detailsView) {
+    // Prevent scroll events from bubbling to parent elements
+    detailsView.addEventListener('scroll', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    // Prevent touch events from affecting background
+    detailsView.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    detailsView.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    detailsView.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    // Handle wheel events for desktop
+    detailsView.addEventListener('wheel', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
 }
 
 // Make functions globally accessible

@@ -73,6 +73,18 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     height: 0;
 }
 
+/* Prevent content interaction when detail view is open */
+body:has(.restaurant-details.active) .content,
+body:has(.restaurant-details.appearing) .content {
+    pointer-events: none;
+    overflow: hidden;
+}
+
+body:has(.restaurant-details.active) .tab-content,
+body:has(.restaurant-details.appearing) .tab-content {
+    pointer-events: none;
+}
+
 .tab-content {
     display: none;
     opacity: 0;
@@ -415,6 +427,12 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     z-index: 500;
 }
 
+/* Hide bottom nav when detail view is open */
+.restaurant-details.active ~ .bottom-nav,
+.restaurant-details.appearing ~ .bottom-nav {
+    z-index: 999;
+}
+
 .nav-item {
     flex: 1;
     display: flex;
@@ -574,13 +592,19 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     right: 0;
     bottom: 0;
     background-color: #fff;
-    z-index: 300;
+    z-index: 1000;
     transform: translateY(100%);
     transition: transform 0.3s ease-in-out;
     max-width: 480px;
     margin: 0 auto;
     overflow-y: auto;
     opacity: 1;
+    pointer-events: none;
+}
+
+.restaurant-details.active,
+.restaurant-details.appearing {
+    pointer-events: auto;
 }
 
 .restaurant-details.active {
