@@ -99,6 +99,165 @@ body:has(.restaurant-details.appearing) .tab-content {
     animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Enhanced Home Tab Animations */
+#home-tab.active .banner-slider {
+    animation: fadeInScale 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#home-tab.active .categories {
+    animation: slideInFromLeft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+}
+
+#home-tab.active .section:nth-child(3) {
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+}
+
+#home-tab.active .section:nth-child(4) {
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
+}
+
+#home-tab.active .section:nth-child(5) {
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both;
+}
+
+/* Welcome Animation Sequence */
+#home-tab.active .logo {
+    animation: logoWelcome 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s both,
+               logoFloat 4s ease-in-out 1.3s infinite;
+}
+
+@keyframes logoWelcome {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-10deg) translateY(-50px);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2) rotate(5deg) translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg) translateY(0px);
+    }
+}
+
+/* Special entrance for location */
+#home-tab.active .location {
+    animation: locationSlide 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s both;
+}
+
+@keyframes locationSlide {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Banner Animations */
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Floating Animation for Header */
+.logo {
+    animation: logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+}
+
+/* Parallax effect for banner */
+.banner-item {
+    transition: transform 0.3s ease;
+}
+
+.banner-item.active {
+    transform: scale(1.05);
+}
+
+/* Pulse effect for category icons */
+.category-icon {
+    animation: iconPulse 3s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Shimmer effect for images */
+.restaurant-image, .collection-item img {
+    position: relative;
+    overflow: hidden;
+}
+
+.restaurant-image::before, .collection-item img::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Hover effects */
+.category-item:hover {
+    transform: translateY(-5px) scale(1.1);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.collection-item:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(238, 77, 45, 0.2);
+}
+
+.restaurant-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
 @keyframes slideInUp {
     0% {
         opacity: 0;
@@ -190,6 +349,30 @@ body:has(.restaurant-details.appearing) .tab-content {
     overflow: hidden;
     padding: 8px;
     border-radius: 12px;
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+}
+
+/* Staggered category animations */
+#home-tab.active .category-item {
+    animation: categorySlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+#home-tab.active .category-item:nth-child(1) { animation-delay: 0.1s; }
+#home-tab.active .category-item:nth-child(2) { animation-delay: 0.15s; }
+#home-tab.active .category-item:nth-child(3) { animation-delay: 0.2s; }
+#home-tab.active .category-item:nth-child(4) { animation-delay: 0.25s; }
+#home-tab.active .category-item:nth-child(5) { animation-delay: 0.3s; }
+
+@keyframes categorySlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .category-item::before {
@@ -284,6 +467,33 @@ body:has(.restaurant-details.appearing) .tab-content {
     pointer-events: auto;
     position: relative;
     z-index: 1;
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+}
+
+/* Collection animations */
+#home-tab.active .collection-item {
+    animation: collectionFadeIn 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+#home-tab.active .collection-item:nth-child(1) { animation-delay: 0.5s; }
+#home-tab.active .collection-item:nth-child(2) { animation-delay: 0.6s; }
+#home-tab.active .collection-item:nth-child(3) { animation-delay: 0.7s; }
+#home-tab.active .collection-item:nth-child(4) { animation-delay: 0.8s; }
+
+@keyframes collectionFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateY(-8px) scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .collection-item:active {
