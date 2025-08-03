@@ -68,7 +68,7 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-bottom: 80px;
+    padding-bottom: 120px;
     position: relative;
     height: 0;
 }
@@ -347,6 +347,13 @@ body:has(.restaurant-details.appearing) .tab-content {
 .restaurant-card:active {
     transform: scale(0.98);
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Ensure restaurant cards are always clickable */
+.restaurant-card {
+    pointer-events: auto !important;
+    z-index: 10;
+    position: relative;
 }
 
 .restaurant-image {

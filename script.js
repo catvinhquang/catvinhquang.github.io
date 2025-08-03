@@ -158,8 +158,9 @@ function loadRestaurants() {
 
 function renderRestaurants(restaurants, containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = restaurants.map(restaurant => `
-        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id}, this)">
+    
+    container.innerHTML = restaurants.map((restaurant, index) => `
+        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id}, this)" data-restaurant-id="${restaurant.id}" data-index="${index}">
             <img src="${restaurant.image}" alt="${restaurant.name}" class="restaurant-image" onerror="this.src='https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop'">
             <div class="restaurant-info">
                 <div class="restaurant-name">${restaurant.name}</div>
@@ -173,6 +174,9 @@ function renderRestaurants(restaurants, containerId) {
             </div>
         </div>
     `).join('');
+    
+    // Add event delegation as backup
+    setupRestaurantClickHandlers(containerId);
     
     // Setup animation for restaurant cards after render
     if (containerId === 'suggestions-list') {
@@ -497,7 +501,7 @@ function showDiscoverCard(restaurant) {
     const card = document.querySelector('.discover-card');
     
     card.innerHTML = `
-        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id}, this)">
+        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id}, this)" data-restaurant-id="${restaurant.id}">
             <img src="${restaurant.image}" alt="${restaurant.name}" class="restaurant-image">
             <div class="restaurant-info">
                 <div class="restaurant-name">${restaurant.name}</div>
@@ -511,6 +515,9 @@ function showDiscoverCard(restaurant) {
             </div>
         </div>
     `;
+    
+    // Add event delegation for discover card too
+    card.addEventListener('click', handleRestaurantClick);
     
     card.classList.add('active');
 }
@@ -664,6 +671,29 @@ function setupScrollAnimation() {
     restaurantCards.forEach(card => {
         window.restaurantObserver.observe(card);
     });
+}
+
+// Setup restaurant click handlers with event delegation
+function setupRestaurantClickHandlers(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Remove existing event listener if any
+    container.removeEventListener('click', handleRestaurantClick);
+    
+    // Add event delegation
+    container.addEventListener('click', handleRestaurantClick);
+}
+
+function handleRestaurantClick(event) {
+    const restaurantCard = event.target.closest('.restaurant-card');
+    if (!restaurantCard) return;
+    
+    const restaurantId = parseInt(restaurantCard.dataset.restaurantId);
+    
+    if (restaurantId && !isNaN(restaurantId)) {
+        openRestaurantDetails(restaurantId, restaurantCard);
+    }
 }
 
 // Setup scroll event handling for detail view

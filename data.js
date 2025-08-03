@@ -107,7 +107,13 @@ const restaurants = [
         image: "https://images.pexels.com/photos/2456435/pexels-photo-2456435.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
         category: "Phở",
         collection: "phuong-cau-lanh-ong",
-        location: { lat: 10.7689, lng: 106.6929 }
+        location: { lat: 10.7689, lng: 106.6929 },
+        menu: [
+            { name: "Phở Bò Tái", price: "45.000đ" },
+            { name: "Phở Bò Chín", price: "45.000đ" },
+            { name: "Phở Bò Tái Chín", price: "50.000đ" },
+            { name: "Phở Đặc Biệt", price: "55.000đ" }
+        ]
     },
     {
         id: 7,
@@ -120,7 +126,13 @@ const restaurants = [
         image: "https://images.pexels.com/photos/3764353/pexels-photo-3764353.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
         category: "Bún",
         collection: "phuong-nhieu-loc",
-        location: { lat: 10.7849, lng: 106.6869 }
+        location: { lat: 10.7849, lng: 106.6869 },
+        menu: [
+            { name: "Bún Riêu Cua Đồng", price: "40.000đ" },
+            { name: "Bún Riêu Cua Biển", price: "45.000đ" },
+            { name: "Bún Riêu Cua Tôm", price: "50.000đ" },
+            { name: "Bún Riêu Đặc Biệt", price: "55.000đ" }
+        ]
     },
     {
         id: 8,
@@ -133,7 +145,13 @@ const restaurants = [
         image: "https://images.pexels.com/photos/3659862/pexels-photo-3659862.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
         category: "Mì Ý",
         collection: "phuong-khanh-hoi-4",
-        location: { lat: 10.7709, lng: 106.7089 }
+        location: { lat: 10.7709, lng: 106.7089 },
+        menu: [
+            { name: "Mì Ý Pepperoni", price: "65.000đ" },
+            { name: "Mì Ý Carbonara", price: "60.000đ" },
+            { name: "Mì Ý Thịt Bò", price: "70.000đ" },
+            { name: "Mì Ý Hải Sản", price: "75.000đ" }
+        ]
     }
 ];
 
