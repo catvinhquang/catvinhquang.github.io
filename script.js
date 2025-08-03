@@ -10,6 +10,7 @@ let userLocation = { lat: 10.7769, lng: 106.7009 };
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded');
     initializeTabs();
     initializeCategories();
     initializeBannerSlider();
@@ -18,6 +19,41 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPromotions();
     initializeMaps();
     setupEventListeners();
+    
+    // Add global click listener to debug
+    document.addEventListener('click', (e) => {
+        console.log('Global click detected on:', e.target);
+        console.log('Target classes:', e.target.className);
+        console.log('Closest collection-item:', e.target.closest('.collection-item'));
+    });
+    
+    // Test collection items after a delay
+    setTimeout(() => {
+        console.log('Testing collection items after delay...');
+        const items = document.querySelectorAll('.collection-item');
+        console.log('Collection items found:', items.length);
+        items.forEach((item, i) => {
+            console.log(`Item ${i}:`, item.dataset.collection, item.offsetWidth, 'x', item.offsetHeight);
+            
+            // Test if element is actually clickable
+            const rect = item.getBoundingClientRect();
+            const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+            console.log(`Element at center of item ${i}:`, elementAtPoint);
+            console.log(`Is same element?`, elementAtPoint === item || item.contains(elementAtPoint));
+        });
+        
+        // Force add click listener directly to first item as test
+        const firstItem = items[0];
+        if (firstItem) {
+            console.log('Adding direct click listener to first item as test');
+            firstItem.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('DIRECT ONCLICK TRIGGERED!');
+                openCollectionView('phuong-cho-quan');
+            };
+        }
+    }, 1000);
 });
 
 // Tab navigation
@@ -140,8 +176,19 @@ function renderRestaurants(restaurants, containerId) {
 
 // Collections
 function openCollectionView(collectionId) {
+    console.log('Opening collection view for:', collectionId);
     const collectionView = document.getElementById('collection-view');
     const collectionTitle = document.getElementById('collection-title');
+    
+    if (!collectionView) {
+        console.error('Collection view element not found!');
+        return;
+    }
+    
+    if (!collectionTitle) {
+        console.error('Collection title element not found!');
+        return;
+    }
     
     // Update title
     const titles = {
@@ -156,10 +203,18 @@ function openCollectionView(collectionId) {
     
     // Filter restaurants
     const filtered = window.appData.restaurants.filter(r => r.collection === collectionId);
+    console.log('Filtered restaurants:', filtered.length);
     renderRestaurants(filtered, 'collection-restaurants');
     
     // Show view
+    console.log('Adding active class to collection view');
     collectionView.classList.add('active');
+    
+    // Force style recalculation
+    setTimeout(() => {
+        console.log('Collection view classes:', collectionView.className);
+        console.log('Collection view style:', window.getComputedStyle(collectionView).transform);
+    }, 100);
 }
 
 function closeCollectionView() {
@@ -349,14 +404,48 @@ function showDiscoverCard(restaurant) {
 
 // Event listeners
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
     // Collection items
-    document.querySelectorAll('.collection-item').forEach(item => {
-        item.addEventListener('click', () => {
+    const collectionItems = document.querySelectorAll('.collection-item');
+    console.log('Found collection items:', collectionItems.length);
+    
+    collectionItems.forEach((item, index) => {
+        console.log(`Collection item ${index}:`, item.dataset.collection);
+        
+        // Simple click without preventDefault/stopPropagation first
+        item.addEventListener('click', (e) => {
+            console.log('COLLECTION CLICK EVENT FIRED!', item.dataset.collection);
             const collection = item.dataset.collection;
             if (collection) {
                 openCollectionView(collection);
             }
         });
+        
+        // Add multiple test events
+        item.addEventListener('mousedown', () => {
+            console.log('Mouse down on collection item', index);
+        });
+        
+        item.addEventListener('mouseup', () => {
+            console.log('Mouse up on collection item', index);
+        });
+        
+        item.addEventListener('pointerdown', () => {
+            console.log('Pointer down on collection item', index);
+        });
+    });
+    
+    // Alternative: Event delegation for collection items
+    document.body.addEventListener('click', (e) => {
+        const collectionItem = e.target.closest('.collection-item');
+        if (collectionItem) {
+            console.log('Event delegation - Collection clicked via body listener');
+            const collection = collectionItem.dataset.collection;
+            console.log('Collection from delegation:', collection);
+            if (collection) {
+                openCollectionView(collection);
+            }
+        }
     });
     
     // Back buttons
