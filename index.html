@@ -1,45 +1,243 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    Fore more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  -->
-  <base href="/">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="sea_entry_task">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>sea_entry_task</title>
-  <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ShopeeFood</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Fallback for slow image loading */
+        img {
+            background-color: #f0f0f0;
+            background-image: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        img[src] {
+            animation: none;
+        }
+    </style>
 </head>
 <body>
-  <!-- This script installs service_worker.js to provide PWA functionality to
-       application. For more information, see:
-       https://developers.google.com/web/fundamentals/primers/service-workers -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('flutter-first-frame', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=414409223');
-      });
-    }
-  </script>
-  <script src="main.dart.js" type="application/javascript"></script>
+    <div class="app">
+        <header class="header">
+            <h1 class="logo">ShopeeFood</h1>
+            <div class="location">
+                <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+                    <path d="M8 0C3.6 0 0 3.6 0 8c0 5.4 8 12 8 12s8-6.6 8-12c0-4.4-3.6-8-8-8zm0 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#ff4d4f"/>
+                </svg>
+                <span>Quận 1 - Hồ Chí Minh</span>
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1l5 5 5-5" stroke="#666" stroke-width="2"/>
+                </svg>
+            </div>
+        </header>
+
+        <main class="content">
+            <!-- Tab Trang chủ -->
+            <div class="tab-content active" id="home-tab">
+                <div class="banner-slider">
+                    <div class="banner-container">
+                        <div class="banner-item active">
+                            <img src="https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop" alt="Banner">
+                        </div>
+                        <div class="banner-item">
+                            <img src="https://images.pexels.com/photos/3186654/pexels-photo-3186654.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop" alt="Banner">
+                        </div>
+                        <div class="banner-item">
+                            <img src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop" alt="Banner">
+                        </div>
+                    </div>
+                    <div class="banner-dots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+
+                <div class="categories">
+                    <div class="category-item active">
+                        <div class="category-icon">🥤</div>
+                        <span>Gọi ý</span>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">🍝</div>
+                        <span>Mì Ý</span>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">🥖</div>
+                        <span>Bánh</span>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">☕</div>
+                        <span>Cà phê</span>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">🍜</div>
+                        <span>Súp</span>
+                    </div>
+                </div>
+
+                <section class="section">
+                    <div class="section-header">
+                        <h2>Bộ sưu tập đặc sắc</h2>
+                        <a href="#" class="see-more">Xem thêm</a>
+                    </div>
+                    <div class="collections">
+                        <div class="collection-item" data-collection="phuong-cho-quan">
+                            <img src="https://images.pexels.com/photos/776538/pexels-photo-776538.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop" alt="Collection">
+                            <span>Phường Chợ Quán</span>
+                        </div>
+                        <div class="collection-item">
+                            <img src="https://images.pexels.com/photos/1581384/pexels-photo-1581384.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop" alt="Collection">
+                            <span>Phường Cầu Lãnh Ông</span>
+                        </div>
+                        <div class="collection-item">
+                            <img src="https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop" alt="Collection">
+                            <span>Phường Nhiều Lộc</span>
+                        </div>
+                        <div class="collection-item">
+                            <img src="https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop" alt="Collection">
+                            <span>Phường Khánh Hội 4</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-header">
+                        <h2>Gợi ý cho bạn</h2>
+                        <a href="#" class="see-more">Xem thêm</a>
+                    </div>
+                    <div class="restaurant-list" id="suggestions-list">
+                        <!-- Restaurants will be populated by JS -->
+                    </div>
+                </section>
+
+                <section class="section">
+                    <h2>Quán gần bạn nhất</h2>
+                    <div class="mini-map">
+                        <div id="home-map"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab OCOP -->
+            <div class="tab-content" id="ocop-tab">
+                <div class="ocop-header">
+                    <img src="https://images.pexels.com/photos/2252584/pexels-photo-2252584.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop" alt="OCOP Banner" class="ocop-banner">
+                    <div class="ocop-info">
+                        <h2>OCOP</h2>
+                        <p>Chương trình OCOP là chương trình phát triển kinh tế khu vực nông thôn theo hướng phát triển nội lực và gia tăng giá trị; là giải pháp, nhiệm vụ... <a href="#">Xem chi tiết</a></p>
+                    </div>
+                </div>
+
+                <section class="section">
+                    <h2>Sản phẩm nổi bật</h2>
+                    <div class="product-list" id="ocop-products">
+                        <!-- Products will be populated by JS -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Ưu đãi -->
+            <div class="tab-content" id="promotion-tab">
+                <div class="promotion-header">
+                    <button class="back-btn">←</button>
+                    <h2>Ưu đãi độc quyền từ các đối tác</h2>
+                </div>
+
+                <div class="promotion-banner">
+                    <img src="https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?auto=compress&cs=tinysrgb&w=800&h=300&fit=crop" alt="Promotion Banner">
+                </div>
+
+                <section class="section">
+                    <h3>🔥 Ưu đãi nổi bật từ MB Bank</h3>
+                    <div class="promotion-list" id="mb-promotions">
+                        <!-- Promotions will be populated by JS -->
+                    </div>
+                </section>
+
+                <section class="section">
+                    <h3>🥤 Ưu đãi nổi bật từ Vietcoco</h3>
+                    <div class="promotion-list" id="vietcoco-promotions">
+                        <!-- Promotions will be populated by JS -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Khám phá -->
+            <div class="tab-content" id="discover-tab">
+                <div class="discover-header">
+                    <button class="back-btn">←</button>
+                    <div class="map-controls">
+                        <button class="locate-btn">📍</button>
+                    </div>
+                </div>
+                <div id="discover-map"></div>
+                <div class="discover-card">
+                    <!-- Restaurant info will be populated by JS -->
+                </div>
+            </div>
+
+            <!-- Collection View -->
+            <div class="collection-view" id="collection-view">
+                <div class="collection-header">
+                    <button class="back-btn" onclick="closeCollectionView()">←</button>
+                    <h2 id="collection-title">Phường Chợ Quán</h2>
+                </div>
+                <div class="collection-filters">
+                    <button class="filter-btn active">Gần nhất</button>
+                    <button class="filter-btn">Khuyến mãi</button>
+                    <button class="filter-btn">Đánh giá</button>
+                </div>
+                <div class="restaurant-list" id="collection-restaurants">
+                    <!-- Restaurants will be populated by JS -->
+                </div>
+            </div>
+
+            <!-- Restaurant Details View -->
+            <div class="restaurant-details" id="restaurant-details">
+                <!-- Details will be populated by JS -->
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="home">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3L2 12h3v9h6v-6h2v6h6v-9h3L12 3z" fill="currentColor"/>
+                </svg>
+                <span>Trang chủ</span>
+            </button>
+            <button class="nav-item" data-tab="ocop">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z" fill="currentColor"/>
+                </svg>
+                <span>OCOP</span>
+            </button>
+            <button class="nav-item" data-tab="promotion">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 5h-3l-1-1h-2l-1 1h-4l-1-1H7l-1 1H3v2h18V5zm-2 8c0 2.21-1.79 4-4 4h-2v-2h2c1.1 0 2-.9 2-2s-.9-2-2-2h-2v2l-3-3 3-3v2h2c2.21 0 4 1.79 4 4zm-8 6h2v2H9c-2.21 0-4-1.79-4-4s1.79-4 4-4h2v2H9c-1.1 0-2 .9-2 2s.9 2 2 2h2v-2l3 3-3 3v-2z" fill="currentColor"/>
+                </svg>
+                <span>Ưu đãi</span>
+            </button>
+            <button class="nav-item" data-tab="discover">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                </svg>
+                <span>Khám phá</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
