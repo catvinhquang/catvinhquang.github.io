@@ -337,6 +337,7 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     right: 0;
     max-width: 480px;
     margin: 0 auto;
+    z-index: 500;
 }
 
 .nav-item {
