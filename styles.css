@@ -67,16 +67,31 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
 
 .tab-content {
     display: none;
-    animation: fadeIn 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tab-content.active {
     display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes slideInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Banner Slider */
@@ -150,7 +165,33 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     gap: 8px;
     min-width: 70px;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.category-item::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(238, 77, 45, 0.1) 0%, transparent 70%);
     transition: all 0.3s ease;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+
+.category-item:hover::before {
+    width: 100px;
+    height: 100px;
+}
+
+.category-item:active {
+    transform: scale(0.95);
 }
 
 .category-icon {
@@ -351,7 +392,30 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     background: none;
     color: #999;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #EE4D2D, #ff6b35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+    border-radius: 0 0 2px 2px;
+}
+
+.nav-item.active::before {
+    width: 60%;
+}
+
+.nav-item:active {
+    transform: scale(0.95);
 }
 
 .nav-item.active {
@@ -376,14 +440,36 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     bottom: 0;
     background-color: #fff;
     z-index: 200;
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
+    transform: translateX(100%) scale(0.95);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     max-width: 480px;
     margin: 0 auto;
+    backdrop-filter: blur(0px);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0);
 }
 
 .collection-view.active {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    backdrop-filter: blur(5px);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.collection-view::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100vw;
+    width: 100vw;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.5s ease;
+    z-index: -1;
+}
+
+.collection-view.active::before {
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .collection-header {
