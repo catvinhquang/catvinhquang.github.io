@@ -153,6 +153,7 @@ function initializeBannerSlider() {
 // Load restaurants
 function loadRestaurants() {
     renderRestaurants(window.appData.restaurants, 'suggestions-list');
+    setupScrollAnimation();
 }
 
 function renderRestaurants(restaurants, containerId) {
@@ -172,6 +173,11 @@ function renderRestaurants(restaurants, containerId) {
             </div>
         </div>
     `).join('');
+    
+    // Setup animation for restaurant cards after render
+    if (containerId === 'suggestions-list') {
+        setupScrollAnimation();
+    }
 }
 
 // Collections
@@ -512,6 +518,44 @@ function setupEventListeners() {
             const walk = (x - startX) * 2;
             element.scrollLeft = scrollLeft - walk;
         });
+    });
+}
+
+// Setup scroll animation for restaurant cards
+function setupScrollAnimation() {
+    // Remove any existing observer
+    if (window.restaurantObserver) {
+        window.restaurantObserver.disconnect();
+    }
+    
+    // Create intersection observer
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -100px 0px', // Trigger when 100px before element enters viewport
+        threshold: 0.1
+    };
+    
+    window.restaurantObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const card = entry.target;
+                const index = Array.from(card.parentNode.children).indexOf(card);
+                
+                // Add staggered delay based on index
+                setTimeout(() => {
+                    card.classList.add('animate-in');
+                }, index * 150); // 150ms delay between each card
+                
+                // Stop observing this card after animation
+                window.restaurantObserver.unobserve(card);
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all restaurant cards in suggestions list
+    const restaurantCards = document.querySelectorAll('#suggestions-list .restaurant-card');
+    restaurantCards.forEach(card => {
+        window.restaurantObserver.observe(card);
     });
 }
 

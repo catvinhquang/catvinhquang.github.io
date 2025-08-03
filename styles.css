@@ -308,6 +308,28 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    animation-fill-mode: forwards;
+}
+
+.restaurant-card.animate-in {
+    animation: slideInRestaurant 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideInRestaurant {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .restaurant-card:active {
