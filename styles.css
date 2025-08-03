@@ -32,6 +32,16 @@ body {
     z-index: 100;
 }
 
+.header.home-only {
+    display: block;
+}
+
+/* Hide header on non-home tabs */
+.tab-content:not(#home-tab).active ~ .header.home-only,
+body:has(.tab-content:not(#home-tab).active) .header.home-only {
+    display: none;
+}
+
 .logo {
     font-size: 24px;
     font-weight: bold;

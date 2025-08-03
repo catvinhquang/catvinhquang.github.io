@@ -46,6 +46,14 @@ function switchTab(tab) {
     document.getElementById(`${tab}-tab`).classList.add('active');
     currentTab = tab;
     
+    // Show/hide header based on tab
+    const header = document.querySelector('.header');
+    if (tab === 'home') {
+        header.style.display = 'block';
+    } else {
+        header.style.display = 'none';
+    }
+    
     // Special handling for discover tab
     if (tab === 'discover' && discoverMap) {
         setTimeout(() => {
