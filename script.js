@@ -159,7 +159,7 @@ function loadRestaurants() {
 function renderRestaurants(restaurants, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = restaurants.map(restaurant => `
-        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id})">
+        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id}, this)">
             <img src="${restaurant.image}" alt="${restaurant.name}" class="restaurant-image" onerror="this.src='https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop'">
             <div class="restaurant-info">
                 <div class="restaurant-name">${restaurant.name}</div>
@@ -229,13 +229,23 @@ function closeCollectionView() {
 }
 
 // Restaurant details
-function openRestaurantDetails(restaurantId) {
+function openRestaurantDetails(restaurantId, clickedElement = null) {
     const restaurant = window.appData.restaurants.find(r => r.id === restaurantId);
     if (!restaurant) return;
     
     currentRestaurant = restaurant;
     const detailsView = document.getElementById('restaurant-details');
     
+    // Find the clicked restaurant image for animation
+    let animatingImage = null;
+    if (clickedElement) {
+        const restaurantCard = clickedElement.closest('.restaurant-card');
+        if (restaurantCard) {
+            animatingImage = restaurantCard.querySelector('.restaurant-image');
+        }
+    }
+    
+    // Create the detail view content
     detailsView.innerHTML = `
         <div class="restaurant-hero">
             <img src="${restaurant.image}" alt="${restaurant.name}" onerror="this.src='https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop'">
@@ -267,11 +277,102 @@ function openRestaurantDetails(restaurantId) {
         <button class="order-btn">Đặt món ngay</button>
     `;
     
-    detailsView.classList.add('active');
+    if (animatingImage) {
+        animateRestaurantThumbnail(animatingImage, detailsView);
+    } else {
+        detailsView.classList.add('active');
+    }
+}
+
+function animateRestaurantThumbnail(originalImage, detailsView) {
+    // Get original image position and size
+    const rect = originalImage.getBoundingClientRect();
+    const restaurantCard = originalImage.closest('.restaurant-card');
+    
+    // Create a clone of the image for animation
+    const clonedImage = originalImage.cloneNode(true);
+    clonedImage.classList.add('animating');
+    
+    // Set initial position and size precisely
+    clonedImage.style.position = 'fixed';
+    clonedImage.style.left = rect.left + 'px';
+    clonedImage.style.top = rect.top + 'px';
+    clonedImage.style.width = rect.width + 'px';
+    clonedImage.style.height = rect.height + 'px';
+    clonedImage.style.zIndex = '2000';
+    clonedImage.style.objectFit = 'cover';
+    clonedImage.style.margin = '0';
+    clonedImage.style.padding = '0';
+    
+    // Add to body
+    document.body.appendChild(clonedImage);
+    
+    // Hide original image and animate the card
+    originalImage.style.transition = 'opacity 0.3s ease';
+    originalImage.style.opacity = '0';
+    if (restaurantCard) {
+        restaurantCard.classList.add('animating');
+    }
+    
+    // Show detail view with animation class immediately
+    detailsView.classList.add('animating');
+    
+    // Use multiple RAF for smoother animation trigger
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            clonedImage.classList.add('animating-to-detail');
+            
+            // Add smooth fade in for detail content
+            setTimeout(() => {
+                const detailInfo = detailsView.querySelector('.restaurant-detail-info');
+                if (detailInfo) {
+                    detailInfo.style.opacity = '1';
+                    detailInfo.style.transform = 'translateY(0)';
+                }
+            }, 400);
+            
+            // After animation completes
+            setTimeout(() => {
+                // Clean up animation and show detail view normally
+                try {
+                    if (document.body.contains(clonedImage)) {
+                        // Fade out cloned image before removing
+                        clonedImage.style.opacity = '0';
+                        setTimeout(() => {
+                            if (document.body.contains(clonedImage)) {
+                                document.body.removeChild(clonedImage);
+                            }
+                        }, 200);
+                    }
+                } catch (e) {
+                    console.log('Cloned image already removed');
+                }
+                
+                // Reset original elements
+                originalImage.style.opacity = '';
+                originalImage.style.transition = '';
+                if (restaurantCard) {
+                    restaurantCard.classList.remove('animating');
+                }
+                
+                // Show detail view normally
+                detailsView.classList.remove('animating');
+                detailsView.classList.add('active');
+                
+                // Ensure hero image is visible
+                const heroImg = detailsView.querySelector('.restaurant-hero img');
+                if (heroImg) {
+                    heroImg.style.opacity = '1';
+                }
+            }, 800); // Match CSS transition duration
+        });
+    });
 }
 
 function closeRestaurantDetails() {
-    document.getElementById('restaurant-details').classList.remove('active');
+    const detailsView = document.getElementById('restaurant-details');
+    detailsView.classList.remove('active');
+    detailsView.classList.remove('animating');
     currentRestaurant = null;
 }
 
@@ -390,7 +491,7 @@ function showDiscoverCard(restaurant) {
     const card = document.querySelector('.discover-card');
     
     card.innerHTML = `
-        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id})">
+        <div class="restaurant-card" onclick="openRestaurantDetails(${restaurant.id}, this)">
             <img src="${restaurant.image}" alt="${restaurant.name}" class="restaurant-image">
             <div class="restaurant-info">
                 <div class="restaurant-name">${restaurant.name}</div>

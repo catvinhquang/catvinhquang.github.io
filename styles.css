@@ -580,6 +580,7 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
     max-width: 480px;
     margin: 0 auto;
     overflow-y: auto;
+    opacity: 1;
 }
 
 .restaurant-details.active {
@@ -943,4 +944,117 @@ body:has(.tab-content:not(#home-tab).active) .header.home-only {
 
 button:active {
     opacity: 0.8;
+}
+
+/* Restaurant thumbnail animation */
+.restaurant-image.animating {
+    position: fixed !important;
+    z-index: 2000 !important;
+    border-radius: 8px;
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    transform-origin: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    will-change: transform, width, height, border-radius;
+}
+
+.restaurant-image.animating-to-detail {
+    width: 100vw !important;
+    max-width: 480px !important;
+    height: 240px !important;
+    border-radius: 0 !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) scale(1.02) !important;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.3);
+}
+
+.restaurant-card.animating {
+    opacity: 0.2;
+    transform: scale(0.95);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.restaurant-details.animating {
+    transform: translateY(0) !important;
+    transition: none !important;
+    backdrop-filter: blur(20px);
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+.restaurant-details.animating .restaurant-hero img {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Add overlay effect during animation */
+.restaurant-details.animating::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, transparent 30%);
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeInOverlay 0.8s ease forwards 0.2s;
+}
+
+@keyframes fadeInOverlay {
+    to {
+        opacity: 1;
+    }
+}
+
+.restaurant-details.animating .restaurant-detail-info {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+}
+
+/* Smooth restoration animation */
+.restaurant-details.active .restaurant-detail-info {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Add subtle pulse effect during animation */
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        box-shadow: 0 12px 48px rgba(238, 77, 45, 0.3);
+    }
+}
+
+.restaurant-image.animating {
+    animation: pulseGlow 0.8s ease;
+}
+
+/* Responsive animation adjustments */
+@media (max-width: 480px) {
+    .restaurant-image.animating-to-detail {
+        width: 100vw !important;
+        max-width: none !important;
+        left: 0 !important;
+        transform: translateX(0) scale(1.01) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .restaurant-image.animating {
+        transition: all 0.3s ease !important;
+        animation: none !important;
+    }
+    
+    .restaurant-card.animating {
+        transition: all 0.3s ease !important;
+    }
+    
+    .restaurant-details.animating .restaurant-detail-info {
+        transition: all 0.3s ease !important;
+    }
 }
