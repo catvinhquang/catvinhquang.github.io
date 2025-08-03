@@ -303,6 +303,7 @@ function animateRestaurantThumbnail(originalImage, detailsView) {
     clonedImage.style.objectFit = 'cover';
     clonedImage.style.margin = '0';
     clonedImage.style.padding = '0';
+    clonedImage.style.borderRadius = '8px';
     
     // Add to body
     document.body.appendChild(clonedImage);
@@ -314,35 +315,35 @@ function animateRestaurantThumbnail(originalImage, detailsView) {
         restaurantCard.classList.add('animating');
     }
     
-    // Show detail view with animation class immediately
-    detailsView.classList.add('animating');
+    // Show detail view with special animation class
+    detailsView.classList.add('appearing');
     
-    // Use multiple RAF for smoother animation trigger
+    // Animate the cloned image
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             clonedImage.classList.add('animating-to-detail');
             
-            // Add smooth fade in for detail content
+            // Start showing detail view content while thumbnail is moving
             setTimeout(() => {
-                const detailInfo = detailsView.querySelector('.restaurant-detail-info');
-                if (detailInfo) {
-                    detailInfo.style.opacity = '1';
-                    detailInfo.style.transform = 'translateY(0)';
-                }
-            }, 400);
+                detailsView.classList.add('active');
+            }, 480); // Show detail view at 40% of animation (480ms of 1200ms)
             
-            // After animation completes
+            // When thumbnail reaches destination - trigger fill-in effect
             setTimeout(() => {
-                // Clean up animation and show detail view normally
+                detailsView.classList.add('filled');
+                
+                // Start fading out cloned image after fill-in triggers
+                setTimeout(() => {
+                    clonedImage.style.transition = 'opacity 0.5s ease';
+                    clonedImage.style.opacity = '0';
+                }, 120);
+            }, 1080); // When thumbnail reaches banner area (90% of 1200ms)
+            
+            // Clean up after animation completes
+            setTimeout(() => {
                 try {
                     if (document.body.contains(clonedImage)) {
-                        // Fade out cloned image before removing
-                        clonedImage.style.opacity = '0';
-                        setTimeout(() => {
-                            if (document.body.contains(clonedImage)) {
-                                document.body.removeChild(clonedImage);
-                            }
-                        }, 200);
+                        document.body.removeChild(clonedImage);
                     }
                 } catch (e) {
                     console.log('Cloned image already removed');
@@ -355,16 +356,10 @@ function animateRestaurantThumbnail(originalImage, detailsView) {
                     restaurantCard.classList.remove('animating');
                 }
                 
-                // Show detail view normally
-                detailsView.classList.remove('animating');
-                detailsView.classList.add('active');
+                // Remove appearing class after everything settles
+                detailsView.classList.remove('appearing');
                 
-                // Ensure hero image is visible
-                const heroImg = detailsView.querySelector('.restaurant-hero img');
-                if (heroImg) {
-                    heroImg.style.opacity = '1';
-                }
-            }, 800); // Match CSS transition duration
+            }, 1700); // Extended cleanup time for refined animation
         });
     });
 }
@@ -372,7 +367,8 @@ function animateRestaurantThumbnail(originalImage, detailsView) {
 function closeRestaurantDetails() {
     const detailsView = document.getElementById('restaurant-details');
     detailsView.classList.remove('active');
-    detailsView.classList.remove('animating');
+    detailsView.classList.remove('appearing');
+    detailsView.classList.remove('filled');
     currentRestaurant = null;
 }
 

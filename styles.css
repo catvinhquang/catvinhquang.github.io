@@ -946,16 +946,16 @@ button:active {
     opacity: 0.8;
 }
 
-/* Restaurant thumbnail animation */
+/* Restaurant thumbnail animation - refined smoothness */
 .restaurant-image.animating {
     position: fixed !important;
     z-index: 2000 !important;
-    border-radius: 8px;
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
-    transform-origin: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    will-change: transform, width, height, border-radius;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    will-change: transform, width, height, border-radius, box-shadow;
+    transform-origin: center center;
+    filter: brightness(1.02) saturate(1.05);
 }
 
 .restaurant-image.animating-to-detail {
@@ -965,74 +965,142 @@ button:active {
     border-radius: 0 !important;
     left: 50% !important;
     top: 0 !important;
-    transform: translateX(-50%) scale(1.02) !important;
-    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.3);
+    transform: translateX(-50%) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    filter: brightness(1) saturate(1);
 }
 
+/* Smooth scale and position animation */
+@keyframes smoothExpand {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+    60% {
+        transform: scale(1.05) translate(-2px, -5px);
+    }
+    100% {
+        transform: translateX(-50%) scale(1.01);
+    }
+}
+
+/* Enhanced card animation */
 .restaurant-card.animating {
-    opacity: 0.2;
-    transform: scale(0.95);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0.5;
+    transform: scale(0.99);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: blur(0.3px) brightness(0.95);
 }
 
-.restaurant-details.animating {
-    transform: translateY(0) !important;
-    transition: none !important;
-    backdrop-filter: blur(20px);
-    background-color: rgba(255, 255, 255, 0.95);
+/* Add subtle background overlay during animation */
+body:has(.restaurant-image.animating) {
+    position: relative;
 }
 
-.restaurant-details.animating .restaurant-hero img {
+body:has(.restaurant-image.animating)::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.05);
+    z-index: 1500;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    animation: fadeInBackground 1.2s ease forwards;
+    pointer-events: none;
 }
 
-/* Add overlay effect during animation */
-.restaurant-details.animating::before {
+@keyframes fadeInBackground {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Appearing animation for detail view */
+.restaurant-details.appearing {
+    transform: translateY(0) !important;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    transition: none;
+    overflow-y: auto !important;
+}
+
+.restaurant-details.appearing.active {
+    background-color: #fff;
+    backdrop-filter: none;
+    transition: background-color 0.4s ease, backdrop-filter 0.4s ease;
+    overflow-y: auto !important;
+}
+
+/* Create empty banner space for thumbnail to fill */
+.restaurant-details.appearing .restaurant-hero {
+    background-color: #fafafa;
+    position: relative;
+    overflow: hidden;
+}
+
+.restaurant-details.appearing .restaurant-hero::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, transparent 30%);
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.4) 50%, 
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: subtleShimmer 2.5s ease-in-out infinite;
     z-index: 1;
-    pointer-events: none;
-    opacity: 0;
-    animation: fadeInOverlay 0.8s ease forwards 0.2s;
 }
 
-@keyframes fadeInOverlay {
-    to {
+@keyframes subtleShimmer {
+    0% { 
+        background-position: -200% 0; 
+        opacity: 0;
+    }
+    50% { 
+        background-position: 200% 0; 
         opacity: 1;
+    }
+    100% { 
+        background-position: 200% 0; 
+        opacity: 0;
     }
 }
 
-.restaurant-details.animating .restaurant-detail-info {
+.restaurant-details.appearing .restaurant-hero img {
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+    visibility: hidden;
+    transition: none;
 }
 
-/* Smooth restoration animation */
-.restaurant-details.active .restaurant-detail-info {
+/* When thumbnail fills in - hide placeholder and show real image */
+.restaurant-details.appearing.filled .restaurant-hero::before {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.restaurant-details.appearing.filled .restaurant-hero img {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+
+.restaurant-details.appearing .restaurant-detail-info {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.3s;
+}
+
+.restaurant-details.appearing.active .restaurant-detail-info {
     opacity: 1;
     transform: translateY(0);
 }
 
-/* Add subtle pulse effect during animation */
-@keyframes pulseGlow {
-    0%, 100% {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    }
-    50% {
-        box-shadow: 0 12px 48px rgba(238, 77, 45, 0.3);
-    }
-}
 
-.restaurant-image.animating {
-    animation: pulseGlow 0.8s ease;
-}
 
 /* Responsive animation adjustments */
 @media (max-width: 480px) {
