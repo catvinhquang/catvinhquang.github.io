@@ -20,40 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeMaps();
     setupEventListeners();
     
-    // Add global click listener to debug
-    document.addEventListener('click', (e) => {
-        console.log('Global click detected on:', e.target);
-        console.log('Target classes:', e.target.className);
-        console.log('Closest collection-item:', e.target.closest('.collection-item'));
-    });
-    
-    // Test collection items after a delay
-    setTimeout(() => {
-        console.log('Testing collection items after delay...');
-        const items = document.querySelectorAll('.collection-item');
-        console.log('Collection items found:', items.length);
-        items.forEach((item, i) => {
-            console.log(`Item ${i}:`, item.dataset.collection, item.offsetWidth, 'x', item.offsetHeight);
-            
-            // Test if element is actually clickable
-            const rect = item.getBoundingClientRect();
-            const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
-            console.log(`Element at center of item ${i}:`, elementAtPoint);
-            console.log(`Is same element?`, elementAtPoint === item || item.contains(elementAtPoint));
-        });
-        
-        // Force add click listener directly to first item as test
-        const firstItem = items[0];
-        if (firstItem) {
-            console.log('Adding direct click listener to first item as test');
-            firstItem.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('DIRECT ONCLICK TRIGGERED!');
-                openCollectionView('phuong-cho-quan');
-            };
-        }
-    }, 1000);
 });
 
 // Tab navigation
@@ -211,24 +177,49 @@ function openCollectionView(collectionId) {
     collectionTitle.textContent = titles[collectionId] || 'Bộ sưu tập';
     currentCollection = collectionId;
     
+    // Debug: Check available restaurants and collections
+    console.log('All restaurants:', window.appData.restaurants.length);
+    console.log('Available collections:', window.appData.restaurants.map(r => r.collection));
+    
     // Filter restaurants
     const filtered = window.appData.restaurants.filter(r => r.collection === collectionId);
-    console.log('Filtered restaurants:', filtered.length);
-    renderRestaurants(filtered, 'collection-restaurants');
+    console.log('Filtered restaurants for', collectionId, ':', filtered.length, filtered);
+    
+    if (filtered.length === 0) {
+        console.warn('No restaurants found for collection:', collectionId);
+        // Add a fallback message
+        const container = document.getElementById('collection-restaurants');
+        container.innerHTML = '<div class="no-restaurants">Không có quán nào trong khu vực này</div>';
+    } else {
+        renderRestaurants(filtered, 'collection-restaurants');
+    }
     
     // Show view
     console.log('Adding active class to collection view');
     collectionView.classList.add('active');
     
-    // Force style recalculation
+    // Prevent body scrolling when collection view is open
+    document.body.style.overflow = 'hidden';
+    
+    // Setup scroll isolation for collection view
+    setupCollectionScrollIsolation(collectionView);
+    
+    // Force style recalculation and ensure visibility
     setTimeout(() => {
         console.log('Collection view classes:', collectionView.className);
-        console.log('Collection view style:', window.getComputedStyle(collectionView).transform);
+        console.log('Collection view display:', window.getComputedStyle(collectionView).display);
+        console.log('Collection view transform:', window.getComputedStyle(collectionView).transform);
+        console.log('Collection view opacity:', window.getComputedStyle(collectionView).opacity);
     }, 100);
 }
 
 function closeCollectionView() {
-    document.getElementById('collection-view').classList.remove('active');
+    const collectionView = document.getElementById('collection-view');
+    collectionView.classList.remove('active');
+    
+    // Restore body scrolling
+    document.body.style.overflow = '';
+    
     currentCollection = null;
 }
 
@@ -525,48 +516,40 @@ function showDiscoverCard(restaurant) {
 // Event listeners
 function setupEventListeners() {
     console.log('Setting up event listeners...');
-    // Collection items
-    const collectionItems = document.querySelectorAll('.collection-item');
-    console.log('Found collection items:', collectionItems.length);
     
-    collectionItems.forEach((item, index) => {
-        console.log(`Collection item ${index}:`, item.dataset.collection);
-        
-        // Simple click without preventDefault/stopPropagation first
-        item.addEventListener('click', (e) => {
-            console.log('COLLECTION CLICK EVENT FIRED!', item.dataset.collection);
-            const collection = item.dataset.collection;
-            if (collection) {
-                openCollectionView(collection);
-            }
-        });
-        
-        // Add multiple test events
-        item.addEventListener('mousedown', () => {
-            console.log('Mouse down on collection item', index);
-        });
-        
-        item.addEventListener('mouseup', () => {
-            console.log('Mouse up on collection item', index);
-        });
-        
-        item.addEventListener('pointerdown', () => {
-            console.log('Pointer down on collection item', index);
-        });
-    });
-    
-    // Alternative: Event delegation for collection items
-    document.body.addEventListener('click', (e) => {
+    // Clean event delegation for collection items - use more specific selector
+    document.addEventListener('click', (e) => {
         const collectionItem = e.target.closest('.collection-item');
-        if (collectionItem) {
-            console.log('Event delegation - Collection clicked via body listener');
-            const collection = collectionItem.dataset.collection;
-            console.log('Collection from delegation:', collection);
-            if (collection) {
-                openCollectionView(collection);
-            }
+        if (collectionItem && collectionItem.dataset.collection) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Collection clicked:', collectionItem.dataset.collection);
+            openCollectionView(collectionItem.dataset.collection);
+            return false;
         }
     });
+    
+    // Additional direct listeners for collection items as backup
+    setTimeout(() => {
+        const collectionItems = document.querySelectorAll('.collection-item');
+        console.log('Setting up direct listeners for', collectionItems.length, 'collection items');
+        
+        collectionItems.forEach((item, index) => {
+            console.log(`Collection item ${index}:`, item.dataset.collection);
+            
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Direct click on collection:', this.dataset.collection);
+                openCollectionView(this.dataset.collection);
+                return false;
+            });
+            
+            // Make sure element is clickable
+            item.style.cursor = 'pointer';
+            item.style.userSelect = 'none';
+        });
+    }, 100);
     
     // Back buttons
     document.querySelectorAll('.back-btn').forEach(btn => {
@@ -720,6 +703,40 @@ function setupDetailViewScrollHandling(detailsView) {
     detailsView.addEventListener('wheel', (e) => {
         e.stopPropagation();
     }, { passive: true });
+}
+
+// Setup scroll isolation for collection view
+function setupCollectionScrollIsolation(collectionView) {
+    // Prevent scroll events from bubbling to parent elements
+    collectionView.addEventListener('scroll', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    // Prevent touch events from affecting background
+    collectionView.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    collectionView.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    collectionView.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+    }, { passive: true });
+    
+    // Handle wheel events for desktop
+    collectionView.addEventListener('wheel', (e) => {
+        e.stopPropagation();
+        
+        // Only scroll within the collection view boundaries
+        const atTop = collectionView.scrollTop === 0;
+        const atBottom = collectionView.scrollHeight - collectionView.scrollTop === collectionView.clientHeight;
+        
+        if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 }
 
 // Make functions globally accessible

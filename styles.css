@@ -717,6 +717,12 @@ body:has(.restaurant-details.appearing) .tab-content {
     backdrop-filter: blur(0px);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0);
     pointer-events: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Scroll isolation */
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    isolation: isolate;
 }
 
 .collection-view.active {
@@ -1366,4 +1372,12 @@ body:has(.restaurant-image.animating)::before {
     .restaurant-details.animating .restaurant-detail-info {
         transition: all 0.3s ease !important;
     }
+}
+
+/* No restaurants message */
+.no-restaurants {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 16px;
 }
