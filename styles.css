@@ -723,6 +723,8 @@ body:has(.restaurant-details.appearing) .tab-content {
     touch-action: pan-y;
     overscroll-behavior: contain;
     isolation: isolate;
+    display: flex;
+    flex-direction: column;
 }
 
 .collection-view.active {
@@ -1372,6 +1374,21 @@ body:has(.restaurant-image.animating)::before {
     .restaurant-details.animating .restaurant-detail-info {
         transition: all 0.3s ease !important;
     }
+}
+
+/* Collection view restaurant list */
+#collection-restaurants {
+    flex: 1;
+    padding: 16px;
+    min-height: 200px;
+}
+
+#collection-restaurants .restaurant-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 /* No restaurants message */

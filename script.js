@@ -153,6 +153,14 @@ function renderRestaurants(restaurants, containerId) {
 // Collections
 function openCollectionView(collectionId) {
     console.log('Opening collection view for:', collectionId);
+    
+    // Check if data is loaded
+    if (!window.appData || !window.appData.restaurants) {
+        console.error('App data not loaded yet!');
+        setTimeout(() => openCollectionView(collectionId), 100);
+        return;
+    }
+    
     const collectionView = document.getElementById('collection-view');
     const collectionTitle = document.getElementById('collection-title');
     
@@ -178,20 +186,35 @@ function openCollectionView(collectionId) {
     currentCollection = collectionId;
     
     // Debug: Check available restaurants and collections
-    console.log('All restaurants:', window.appData.restaurants.length);
-    console.log('Available collections:', window.appData.restaurants.map(r => r.collection));
+    console.log('App data check:', {
+        hasAppData: !!window.appData,
+        hasRestaurants: !!(window.appData && window.appData.restaurants),
+        restaurantCount: window.appData?.restaurants?.length || 0,
+        collectionId: collectionId
+    });
     
-    // Filter restaurants
-    const filtered = window.appData.restaurants.filter(r => r.collection === collectionId);
-    console.log('Filtered restaurants for', collectionId, ':', filtered.length, filtered);
-    
-    if (filtered.length === 0) {
-        console.warn('No restaurants found for collection:', collectionId);
-        // Add a fallback message
+    if (window.appData && window.appData.restaurants) {
+        console.log('All restaurants:', window.appData.restaurants.length);
+        console.log('Available collections:', [...new Set(window.appData.restaurants.map(r => r.collection))]);
+        
+        // Filter restaurants
+        const filtered = window.appData.restaurants.filter(r => r.collection === collectionId);
+        console.log('Filtered restaurants for', collectionId, ':', filtered.length);
+        console.log('Filtered restaurant names:', filtered.map(r => r.name));
+        
         const container = document.getElementById('collection-restaurants');
-        container.innerHTML = '<div class="no-restaurants">Không có quán nào trong khu vực này</div>';
-    } else {
-        renderRestaurants(filtered, 'collection-restaurants');
+        if (!container) {
+            console.error('Collection restaurants container not found!');
+            return;
+        }
+        
+        if (filtered.length === 0) {
+            console.warn('No restaurants found for collection:', collectionId);
+            container.innerHTML = '<div class="no-restaurants">Không có quán nào trong khu vực này</div>';
+        } else {
+            console.log('Rendering', filtered.length, 'restaurants');
+            renderRestaurants(filtered, 'collection-restaurants');
+        }
     }
     
     // Show view
