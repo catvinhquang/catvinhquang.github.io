@@ -20,6 +20,71 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeMaps();
     setupEventListeners();
     
+    // Global ESC key handler for popups
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const popup = document.getElementById('food-detail-popup');
+            if (popup && popup.classList.contains('active')) {
+                console.log('ESC pressed - closing popup');
+                popup.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+    });
+    
+    // Setup close button handler once on page load
+    setTimeout(() => {
+        const closeBtn = document.getElementById('close-btn');
+        if (closeBtn) {
+            console.log('Setting up close button handler');
+            
+            // Add multiple event types to test
+            closeBtn.addEventListener('click', function(e) {
+                console.log('Close button CLICK detected');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const popup = document.getElementById('food-detail-popup');
+                if (popup) {
+                    popup.classList.remove('active');
+                    document.body.style.overflow = '';
+                    console.log('Popup closed via close button');
+                }
+            });
+            
+            closeBtn.addEventListener('mousedown', function(e) {
+                console.log('Close button MOUSEDOWN detected');
+            });
+            
+            closeBtn.addEventListener('touchstart', function(e) {
+                console.log('Close button TOUCHSTART detected');
+                e.preventDefault();
+                const popup = document.getElementById('food-detail-popup');
+                if (popup) {
+                    popup.classList.remove('active');
+                    document.body.style.overflow = '';
+                    console.log('Popup closed via touch');
+                }
+            });
+            
+        } else {
+            console.log('Close button not found');
+        }
+        
+        // Setup background click handler
+        const popup = document.getElementById('food-detail-popup');
+        if (popup) {
+            console.log('Setting up background click handler');
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) {
+                    console.log('Background clicked (global handler)');
+                    popup.classList.remove('active');
+                    document.body.style.overflow = '';
+                    console.log('Popup closed via background click');
+                }
+            });
+        }
+    }, 1000);
 });
 
 // Tab navigation
@@ -811,35 +876,60 @@ function openFoodDetail(index) {
 
 // Close food detail popup
 function closeFoodDetail() {
+    console.log('Closing food detail popup');
     const popup = document.getElementById('food-detail-popup');
-    popup.classList.remove('active');
-    document.body.style.overflow = '';
-    
-    // Clean up event handlers
-    removeSwipeHandlers();
+    if (popup) {
+        popup.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Clean up event handlers
+        removeSwipeHandlers();
+        console.log('Food detail popup closed');
+    } else {
+        console.error('Food detail popup not found');
+    }
 }
 
 // Navigate between food items
 function navigateFood(direction) {
-    if (!currentRestaurant || !currentRestaurant.menu) return;
+    console.log('NavigateFood called with direction:', direction);
+    console.log('Current restaurant:', currentRestaurant);
+    console.log('Current food index:', currentFoodIndex);
+    
+    if (!currentRestaurant || !currentRestaurant.menu) {
+        console.log('No restaurant or menu available');
+        return;
+    }
     
     const menuLength = currentRestaurant.menu.length;
+    const oldIndex = currentFoodIndex;
     currentFoodIndex = (currentFoodIndex + direction + menuLength) % menuLength;
     
-    const foodItem = currentRestaurant.menu[currentFoodIndex];
+    console.log('Menu length:', menuLength, 'Old index:', oldIndex, 'New index:', currentFoodIndex);
     
-    // Animate plate rotation
+    const foodItem = currentRestaurant.menu[currentFoodIndex];
+    console.log('New food item:', foodItem);
+    
+    // Animate plate rotation when changing food
     const plate = document.querySelector('.spinning-plate');
-    plate.style.animation = 'none';
-    setTimeout(() => {
-        plate.style.animation = 'plateSpinClock 8s linear infinite, quickSpin 0.6s ease-out';
-    }, 10);
+    if (plate) {
+        plate.style.animation = 'quickSpin 0.8s ease-out';
+        // Clear animation after it completes
+        setTimeout(() => {
+            plate.style.animation = '';
+        }, 800);
+    }
     
     // Update content with fade effect
     const foodImage = document.getElementById('current-food-image');
     const foodName = document.getElementById('food-name');
     const foodDesc = document.getElementById('food-description');
     const foodPrice = document.getElementById('food-price');
+    
+    if (!foodImage || !foodName || !foodDesc || !foodPrice) {
+        console.error('Food detail elements not found');
+        return;
+    }
     
     // Fade out
     foodImage.style.opacity = '0';
@@ -859,11 +949,16 @@ function navigateFood(direction) {
         foodName.style.opacity = '1';
         foodDesc.style.opacity = '1';
         foodPrice.style.opacity = '1';
+        
+        console.log('Food content updated successfully');
     }, 300);
     
     // Reset quantity
     currentQuantity = 1;
-    document.getElementById('food-quantity').textContent = currentQuantity;
+    const quantityElement = document.getElementById('food-quantity');
+    if (quantityElement) {
+        quantityElement.textContent = currentQuantity;
+    }
 }
 
 // Update quantity
@@ -875,125 +970,201 @@ function updateQuantity(change) {
 // Setup swipe handlers
 function setupSwipeHandlers() {
     const foodBanner = document.querySelector('.food-banner');
-    const foodContainer = document.querySelector('.food-detail-container');
+    
+    if (!foodBanner) {
+        console.error('Food banner not found for swipe setup');
+        return;
+    }
     
     // Remove existing listeners to prevent duplicates
     removeSwipeHandlers();
     
-    // Touch events for mobile
-    foodBanner.addEventListener('touchstart', handleTouchStart, { passive: false });
-    foodBanner.addEventListener('touchmove', handleTouchMove, { passive: false });
-    foodBanner.addEventListener('touchend', handleTouchEnd, { passive: false });
+    console.log('Setting up swipe handlers on:', foodBanner);
+    
+    // Simple touch detection
+    let startX = 0;
+    let startY = 0;
+    let endX = 0;
+    let endY = 0;
+    let isTouch = false;
+    
+    // Touch events
+    const onTouchStart = (e) => {
+        isTouch = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        endX = startX;
+        endY = startY;
+        
+        foodBanner.classList.add('touching');
+        console.log('Touch start at:', startX, startY);
+    };
+    
+    const onTouchMove = (e) => {
+        if (!isTouch) return;
+        endX = e.touches[0].clientX;
+        endY = e.touches[0].clientY;
+        
+        // Prevent scrolling if horizontal movement is significant
+        const deltaX = Math.abs(endX - startX);
+        const deltaY = Math.abs(endY - startY);
+        
+        if (deltaX > deltaY && deltaX > 10) {
+            e.preventDefault();
+        }
+    };
+    
+    const onTouchEnd = (e) => {
+        if (!isTouch) return;
+        isTouch = false;
+        
+        foodBanner.classList.remove('touching');
+        
+        const deltaX = startX - endX;
+        const deltaY = Math.abs(startY - endY);
+        
+        console.log('Touch end - deltaX:', deltaX, 'deltaY:', deltaY);
+        
+        // Check if it's a horizontal swipe
+        if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY) {
+            if (deltaX > 0) {
+                console.log('Swipe left detected - going to next');
+                navigateFood(1);
+            } else {
+                console.log('Swipe right detected - going to previous');
+                navigateFood(-1);
+            }
+        }
+        
+        // Reset
+        startX = 0;
+        startY = 0;
+        endX = 0;
+        endY = 0;
+    };
     
     // Mouse events for desktop
     let mouseDown = false;
-    let startX = 0;
     
-    const handleMouseDown = (e) => {
+    const onMouseDown = (e) => {
         mouseDown = true;
         startX = e.clientX;
-        touchStartX = e.clientX;
+        startY = e.clientY;
+        endX = startX;
+        endY = startY;
         
-        // Add visual feedback
         foodBanner.classList.add('touching');
-        
+        console.log('Mouse down at:', startX, startY);
         e.preventDefault();
     };
     
-    const handleMouseMove = (e) => {
+    const onMouseMove = (e) => {
         if (!mouseDown) return;
-        touchEndX = e.clientX;
-        e.preventDefault();
+        endX = e.clientX;
+        endY = e.clientY;
     };
     
-    const handleMouseUp = (e) => {
+    const onMouseUp = (e) => {
         if (!mouseDown) return;
         mouseDown = false;
         
-        // Remove visual feedback
         foodBanner.classList.remove('touching');
         
-        handleSwipe();
-        e.preventDefault();
+        const deltaX = startX - endX;
+        const deltaY = Math.abs(startY - endY);
+        
+        console.log('Mouse up - deltaX:', deltaX, 'deltaY:', deltaY);
+        
+        // Check if it's a horizontal drag
+        if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY) {
+            if (deltaX > 0) {
+                console.log('Drag left detected - going to next');
+                navigateFood(1);
+            } else {
+                console.log('Drag right detected - going to previous');
+                navigateFood(-1);
+            }
+        }
+        
+        // Reset
+        startX = 0;
+        startY = 0;
+        endX = 0;
+        endY = 0;
     };
     
-    const handleMouseLeave = () => {
+    const onMouseLeave = () => {
         if (mouseDown) {
-            // Remove visual feedback
             foodBanner.classList.remove('touching');
         }
         mouseDown = false;
-        touchStartX = 0;
-        touchEndX = 0;
+        startX = 0;
+        startY = 0;
+        endX = 0;
+        endY = 0;
     };
     
-    foodBanner.addEventListener('mousedown', handleMouseDown);
-    foodBanner.addEventListener('mousemove', handleMouseMove);
-    foodBanner.addEventListener('mouseup', handleMouseUp);
-    foodBanner.addEventListener('mouseleave', handleMouseLeave);
+    // Add event listeners
+    foodBanner.addEventListener('touchstart', onTouchStart, { passive: false });
+    foodBanner.addEventListener('touchmove', onTouchMove, { passive: false });
+    foodBanner.addEventListener('touchend', onTouchEnd, { passive: false });
+    
+    foodBanner.addEventListener('mousedown', onMouseDown);
+    foodBanner.addEventListener('mousemove', onMouseMove);
+    foodBanner.addEventListener('mouseup', onMouseUp);
+    foodBanner.addEventListener('mouseleave', onMouseLeave);
     
     // Store handlers for cleanup
     foodBanner._swipeHandlers = {
-        mousedown: handleMouseDown,
-        mousemove: handleMouseMove,
-        mouseup: handleMouseUp,
-        mouseleave: handleMouseLeave
+        touchstart: onTouchStart,
+        touchmove: onTouchMove,
+        touchend: onTouchEnd,
+        mousedown: onMouseDown,
+        mousemove: onMouseMove,
+        mouseup: onMouseUp,
+        mouseleave: onMouseLeave
     };
     
     // Add keyboard navigation
     document.addEventListener('keydown', handleKeyNavigation);
+    
+    // Add simple click test for debugging
+    foodBanner.addEventListener('click', (e) => {
+        console.log('Banner clicked at:', e.clientX, e.clientY);
+        // Test navigation on click
+        if (e.clientX < window.innerWidth / 2) {
+            console.log('Left side clicked - going previous');
+            navigateFood(-1);
+        } else {
+            console.log('Right side clicked - going next');
+            navigateFood(1);
+        }
+    });
+    
+    console.log('Swipe handlers setup complete');
 }
 
 function removeSwipeHandlers() {
     const foodBanner = document.querySelector('.food-banner');
     if (!foodBanner) return;
     
-    foodBanner.removeEventListener('touchstart', handleTouchStart);
-    foodBanner.removeEventListener('touchmove', handleTouchMove);
-    foodBanner.removeEventListener('touchend', handleTouchEnd);
+    console.log('Removing swipe handlers');
     
     if (foodBanner._swipeHandlers) {
+        foodBanner.removeEventListener('touchstart', foodBanner._swipeHandlers.touchstart);
+        foodBanner.removeEventListener('touchmove', foodBanner._swipeHandlers.touchmove);
+        foodBanner.removeEventListener('touchend', foodBanner._swipeHandlers.touchend);
         foodBanner.removeEventListener('mousedown', foodBanner._swipeHandlers.mousedown);
         foodBanner.removeEventListener('mousemove', foodBanner._swipeHandlers.mousemove);
         foodBanner.removeEventListener('mouseup', foodBanner._swipeHandlers.mouseup);
         foodBanner.removeEventListener('mouseleave', foodBanner._swipeHandlers.mouseleave);
+        
+        delete foodBanner._swipeHandlers;
     }
     
     document.removeEventListener('keydown', handleKeyNavigation);
 }
 
-function handleTouchStart(e) {
-    touchStartX = e.touches[0].clientX;
-    touchEndX = touchStartX;
-    
-    // Add visual feedback
-    const foodBanner = document.querySelector('.food-banner');
-    foodBanner.classList.add('touching');
-    
-    console.log('Touch start:', touchStartX);
-}
-
-function handleTouchMove(e) {
-    touchEndX = e.touches[0].clientX;
-    // Prevent vertical scrolling during horizontal swipe
-    const diffX = Math.abs(touchStartX - touchEndX);
-    const diffY = Math.abs(e.touches[0].clientY - (e.touches[0].clientY || 0));
-    
-    if (diffX > diffY && diffX > 10) {
-        e.preventDefault();
-    }
-}
-
-function handleTouchEnd(e) {
-    console.log('Touch end - start:', touchStartX, 'end:', touchEndX);
-    
-    // Remove visual feedback
-    const foodBanner = document.querySelector('.food-banner');
-    foodBanner.classList.remove('touching');
-    
-    handleSwipe();
-    e.preventDefault();
-}
 
 function handleKeyNavigation(e) {
     const popup = document.getElementById('food-detail-popup');
@@ -1011,28 +1182,6 @@ function handleKeyNavigation(e) {
     }
 }
 
-function handleSwipe() {
-    const swipeThreshold = 50;
-    const diff = touchStartX - touchEndX;
-    
-    console.log('Swipe check - diff:', diff, 'threshold:', swipeThreshold);
-    
-    if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0) {
-            // Swipe left - next item
-            console.log('Swiped left - next item');
-            navigateFood(1);
-        } else {
-            // Swipe right - previous item
-            console.log('Swiped right - previous item');
-            navigateFood(-1);
-        }
-    }
-    
-    // Reset
-    touchStartX = 0;
-    touchEndX = 0;
-}
 
 // Make functions globally accessible
 window.openCollectionView = openCollectionView;
@@ -1040,6 +1189,38 @@ window.closeCollectionView = closeCollectionView;
 window.openRestaurantDetails = openRestaurantDetails;
 window.closeRestaurantDetails = closeRestaurantDetails;
 window.animateMenuItem = animateMenuItem;
-window.closeFoodDetail = closeFoodDetail;
 window.navigateFood = navigateFood;
 window.updateQuantity = updateQuantity;
+
+// Simple background close function
+window.closePopupBackground = function(event) {
+    if (event.target.id === 'food-detail-popup') {
+        console.log('Background clicked - closing popup');
+        const popup = document.getElementById('food-detail-popup');
+        if (popup) {
+            popup.classList.remove('active');
+            document.body.style.overflow = '';
+            console.log('Popup closed via background click');
+        }
+    }
+};
+
+// Ensure closeFoodDetail is accessible
+window.closeFoodDetail = function() {
+    console.log('Window.closeFoodDetail called');
+    const popup = document.getElementById('food-detail-popup');
+    console.log('Popup element:', popup);
+    console.log('Popup has active class:', popup?.classList.contains('active'));
+    
+    if (popup) {
+        popup.classList.remove('active');
+        document.body.style.overflow = '';
+        console.log('Popup active class removed');
+        
+        // Clean up event handlers
+        removeSwipeHandlers();
+        console.log('Swipe handlers removed');
+    } else {
+        console.error('Food detail popup element not found');
+    }
+};

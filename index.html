@@ -238,8 +238,8 @@
 
             <!-- Food Detail Popup -->
             <div class="food-detail-popup" id="food-detail-popup">
-                <div class="food-detail-container">
-                    <button class="close-food-detail" onclick="closeFoodDetail()">×</button>
+                <div class="food-detail-container" onclick="event.stopPropagation();">
+                    <button class="close-food-detail" id="close-btn">×</button>
                     
                     <!-- Plate Animation Banner -->
                     <div class="food-banner">
