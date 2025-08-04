@@ -235,6 +235,44 @@
             <div class="restaurant-details" id="restaurant-details">
                 <!-- Details will be populated by JS -->
             </div>
+
+            <!-- Food Detail Popup -->
+            <div class="food-detail-popup" id="food-detail-popup">
+                <div class="food-detail-container">
+                    <button class="close-food-detail" onclick="closeFoodDetail()">×</button>
+                    
+                    <!-- Plate Animation Banner -->
+                    <div class="food-banner">
+                        <div class="food-plate-container">
+                            <div class="spinning-plate">
+                                <div class="plate-base"></div>
+                                <div class="plate-rim"></div>
+                                <div class="food-on-plate">
+                                    <img id="current-food-image" src="" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Navigation arrows -->
+                        <button class="food-nav-arrow prev" onclick="navigateFood(-1)">‹</button>
+                        <button class="food-nav-arrow next" onclick="navigateFood(1)">›</button>
+                    </div>
+                    
+                    <!-- Food Info -->
+                    <div class="food-detail-info">
+                        <h2 id="food-name"></h2>
+                        <p id="food-description" class="food-description"></p>
+                        <div class="food-price-section">
+                            <span class="food-price" id="food-price"></span>
+                            <div class="quantity-selector">
+                                <button onclick="updateQuantity(-1)">-</button>
+                                <span id="food-quantity">1</span>
+                                <button onclick="updateQuantity(1)">+</button>
+                            </div>
+                        </div>
+                        <button class="add-to-cart-btn">Thêm vào giỏ hàng</button>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <nav class="bottom-nav">

@@ -769,21 +769,167 @@ function setupCollectionScrollIsolation(collectionView) {
     }, { passive: false });
 }
 
-// Menu item animation
+// Food detail popup state
+let currentFoodIndex = 0;
+let currentQuantity = 1;
+let touchStartX = 0;
+let touchEndX = 0;
+
+// Menu item animation and open food detail
 function animateMenuItem(element, index) {
     // Don't animate if already animating
     if (element.classList.contains('animating')) return;
     
-    // Add animating class
-    element.classList.add('animating');
+    // Open food detail popup
+    openFoodDetail(index);
+}
+
+// Open food detail popup
+function openFoodDetail(index) {
+    if (!currentRestaurant || !currentRestaurant.menu[index]) return;
     
-    // Remove animation class after animation completes
+    currentFoodIndex = index;
+    currentQuantity = 1;
+    
+    const popup = document.getElementById('food-detail-popup');
+    const foodItem = currentRestaurant.menu[index];
+    
+    // Update content
+    document.getElementById('current-food-image').src = currentRestaurant.image;
+    document.getElementById('food-name').textContent = foodItem.name;
+    document.getElementById('food-description').textContent = foodItem.description || 'Món ăn ngon được chế biến từ nguyên liệu tươi ngon, đảm bảo vệ sinh an toàn thực phẩm.';
+    document.getElementById('food-price').textContent = foodItem.price;
+    document.getElementById('food-quantity').textContent = currentQuantity;
+    
+    // Show popup
+    popup.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Setup swipe handlers
+    setupSwipeHandlers();
+}
+
+// Close food detail popup
+function closeFoodDetail() {
+    const popup = document.getElementById('food-detail-popup');
+    popup.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Navigate between food items
+function navigateFood(direction) {
+    if (!currentRestaurant || !currentRestaurant.menu) return;
+    
+    const menuLength = currentRestaurant.menu.length;
+    currentFoodIndex = (currentFoodIndex + direction + menuLength) % menuLength;
+    
+    const foodItem = currentRestaurant.menu[currentFoodIndex];
+    
+    // Animate plate rotation
+    const plate = document.querySelector('.spinning-plate');
+    plate.style.animation = 'none';
     setTimeout(() => {
-        element.classList.remove('animating');
-    }, 1800); // Total animation duration
+        plate.style.animation = 'plateSpinClock 8s linear infinite, quickSpin 0.6s ease-out';
+    }, 10);
     
-    // Optional: Log which menu item was clicked
-    console.log('Menu item clicked:', currentRestaurant?.menu[index]?.name);
+    // Update content with fade effect
+    const foodImage = document.getElementById('current-food-image');
+    const foodName = document.getElementById('food-name');
+    const foodDesc = document.getElementById('food-description');
+    const foodPrice = document.getElementById('food-price');
+    
+    // Fade out
+    foodImage.style.opacity = '0';
+    foodName.style.opacity = '0';
+    foodDesc.style.opacity = '0';
+    foodPrice.style.opacity = '0';
+    
+    setTimeout(() => {
+        // Update content
+        foodImage.src = currentRestaurant.image;
+        foodName.textContent = foodItem.name;
+        foodDesc.textContent = foodItem.description || 'Món ăn ngon được chế biến từ nguyên liệu tươi ngon, đảm bảo vệ sinh an toàn thực phẩm.';
+        foodPrice.textContent = foodItem.price;
+        
+        // Fade in
+        foodImage.style.opacity = '1';
+        foodName.style.opacity = '1';
+        foodDesc.style.opacity = '1';
+        foodPrice.style.opacity = '1';
+    }, 300);
+    
+    // Reset quantity
+    currentQuantity = 1;
+    document.getElementById('food-quantity').textContent = currentQuantity;
+}
+
+// Update quantity
+function updateQuantity(change) {
+    currentQuantity = Math.max(1, currentQuantity + change);
+    document.getElementById('food-quantity').textContent = currentQuantity;
+}
+
+// Setup swipe handlers
+function setupSwipeHandlers() {
+    const foodBanner = document.querySelector('.food-banner');
+    
+    // Touch events
+    foodBanner.addEventListener('touchstart', handleTouchStart, { passive: true });
+    foodBanner.addEventListener('touchmove', handleTouchMove, { passive: true });
+    foodBanner.addEventListener('touchend', handleTouchEnd);
+    
+    // Mouse events for desktop
+    let mouseDown = false;
+    foodBanner.addEventListener('mousedown', (e) => {
+        mouseDown = true;
+        touchStartX = e.clientX;
+    });
+    
+    foodBanner.addEventListener('mousemove', (e) => {
+        if (!mouseDown) return;
+        touchEndX = e.clientX;
+    });
+    
+    foodBanner.addEventListener('mouseup', () => {
+        if (!mouseDown) return;
+        mouseDown = false;
+        handleSwipe();
+    });
+    
+    foodBanner.addEventListener('mouseleave', () => {
+        mouseDown = false;
+    });
+}
+
+function handleTouchStart(e) {
+    touchStartX = e.touches[0].clientX;
+}
+
+function handleTouchMove(e) {
+    touchEndX = e.touches[0].clientX;
+}
+
+function handleTouchEnd() {
+    handleSwipe();
+}
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    const diff = touchStartX - touchEndX;
+    
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+            // Swipe left - next item
+            navigateFood(1);
+        } else {
+            // Swipe right - previous item
+            navigateFood(-1);
+        }
+    }
+    
+    // Reset
+    touchStartX = 0;
+    touchEndX = 0;
 }
 
 // Make functions globally accessible
@@ -792,3 +938,6 @@ window.closeCollectionView = closeCollectionView;
 window.openRestaurantDetails = openRestaurantDetails;
 window.closeRestaurantDetails = closeRestaurantDetails;
 window.animateMenuItem = animateMenuItem;
+window.closeFoodDetail = closeFoodDetail;
+window.navigateFood = navigateFood;
+window.updateQuantity = updateQuantity;
