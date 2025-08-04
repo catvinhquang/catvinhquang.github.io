@@ -814,6 +814,9 @@ function closeFoodDetail() {
     const popup = document.getElementById('food-detail-popup');
     popup.classList.remove('active');
     document.body.style.overflow = '';
+    
+    // Clean up event handlers
+    removeSwipeHandlers();
 }
 
 // Navigate between food items
@@ -872,57 +875,156 @@ function updateQuantity(change) {
 // Setup swipe handlers
 function setupSwipeHandlers() {
     const foodBanner = document.querySelector('.food-banner');
+    const foodContainer = document.querySelector('.food-detail-container');
     
-    // Touch events
-    foodBanner.addEventListener('touchstart', handleTouchStart, { passive: true });
-    foodBanner.addEventListener('touchmove', handleTouchMove, { passive: true });
-    foodBanner.addEventListener('touchend', handleTouchEnd);
+    // Remove existing listeners to prevent duplicates
+    removeSwipeHandlers();
+    
+    // Touch events for mobile
+    foodBanner.addEventListener('touchstart', handleTouchStart, { passive: false });
+    foodBanner.addEventListener('touchmove', handleTouchMove, { passive: false });
+    foodBanner.addEventListener('touchend', handleTouchEnd, { passive: false });
     
     // Mouse events for desktop
     let mouseDown = false;
-    foodBanner.addEventListener('mousedown', (e) => {
-        mouseDown = true;
-        touchStartX = e.clientX;
-    });
+    let startX = 0;
     
-    foodBanner.addEventListener('mousemove', (e) => {
+    const handleMouseDown = (e) => {
+        mouseDown = true;
+        startX = e.clientX;
+        touchStartX = e.clientX;
+        
+        // Add visual feedback
+        foodBanner.classList.add('touching');
+        
+        e.preventDefault();
+    };
+    
+    const handleMouseMove = (e) => {
         if (!mouseDown) return;
         touchEndX = e.clientX;
-    });
+        e.preventDefault();
+    };
     
-    foodBanner.addEventListener('mouseup', () => {
+    const handleMouseUp = (e) => {
         if (!mouseDown) return;
         mouseDown = false;
+        
+        // Remove visual feedback
+        foodBanner.classList.remove('touching');
+        
         handleSwipe();
-    });
+        e.preventDefault();
+    };
     
-    foodBanner.addEventListener('mouseleave', () => {
+    const handleMouseLeave = () => {
+        if (mouseDown) {
+            // Remove visual feedback
+            foodBanner.classList.remove('touching');
+        }
         mouseDown = false;
-    });
+        touchStartX = 0;
+        touchEndX = 0;
+    };
+    
+    foodBanner.addEventListener('mousedown', handleMouseDown);
+    foodBanner.addEventListener('mousemove', handleMouseMove);
+    foodBanner.addEventListener('mouseup', handleMouseUp);
+    foodBanner.addEventListener('mouseleave', handleMouseLeave);
+    
+    // Store handlers for cleanup
+    foodBanner._swipeHandlers = {
+        mousedown: handleMouseDown,
+        mousemove: handleMouseMove,
+        mouseup: handleMouseUp,
+        mouseleave: handleMouseLeave
+    };
+    
+    // Add keyboard navigation
+    document.addEventListener('keydown', handleKeyNavigation);
+}
+
+function removeSwipeHandlers() {
+    const foodBanner = document.querySelector('.food-banner');
+    if (!foodBanner) return;
+    
+    foodBanner.removeEventListener('touchstart', handleTouchStart);
+    foodBanner.removeEventListener('touchmove', handleTouchMove);
+    foodBanner.removeEventListener('touchend', handleTouchEnd);
+    
+    if (foodBanner._swipeHandlers) {
+        foodBanner.removeEventListener('mousedown', foodBanner._swipeHandlers.mousedown);
+        foodBanner.removeEventListener('mousemove', foodBanner._swipeHandlers.mousemove);
+        foodBanner.removeEventListener('mouseup', foodBanner._swipeHandlers.mouseup);
+        foodBanner.removeEventListener('mouseleave', foodBanner._swipeHandlers.mouseleave);
+    }
+    
+    document.removeEventListener('keydown', handleKeyNavigation);
 }
 
 function handleTouchStart(e) {
     touchStartX = e.touches[0].clientX;
+    touchEndX = touchStartX;
+    
+    // Add visual feedback
+    const foodBanner = document.querySelector('.food-banner');
+    foodBanner.classList.add('touching');
+    
+    console.log('Touch start:', touchStartX);
 }
 
 function handleTouchMove(e) {
     touchEndX = e.touches[0].clientX;
+    // Prevent vertical scrolling during horizontal swipe
+    const diffX = Math.abs(touchStartX - touchEndX);
+    const diffY = Math.abs(e.touches[0].clientY - (e.touches[0].clientY || 0));
+    
+    if (diffX > diffY && diffX > 10) {
+        e.preventDefault();
+    }
 }
 
-function handleTouchEnd() {
+function handleTouchEnd(e) {
+    console.log('Touch end - start:', touchStartX, 'end:', touchEndX);
+    
+    // Remove visual feedback
+    const foodBanner = document.querySelector('.food-banner');
+    foodBanner.classList.remove('touching');
+    
     handleSwipe();
+    e.preventDefault();
+}
+
+function handleKeyNavigation(e) {
+    const popup = document.getElementById('food-detail-popup');
+    if (!popup.classList.contains('active')) return;
+    
+    if (e.key === 'ArrowLeft') {
+        navigateFood(-1);
+        e.preventDefault();
+    } else if (e.key === 'ArrowRight') {
+        navigateFood(1);
+        e.preventDefault();
+    } else if (e.key === 'Escape') {
+        closeFoodDetail();
+        e.preventDefault();
+    }
 }
 
 function handleSwipe() {
     const swipeThreshold = 50;
     const diff = touchStartX - touchEndX;
     
+    console.log('Swipe check - diff:', diff, 'threshold:', swipeThreshold);
+    
     if (Math.abs(diff) > swipeThreshold) {
         if (diff > 0) {
             // Swipe left - next item
+            console.log('Swiped left - next item');
             navigateFood(1);
         } else {
             // Swipe right - previous item
+            console.log('Swiped right - previous item');
             navigateFood(-1);
         }
     }

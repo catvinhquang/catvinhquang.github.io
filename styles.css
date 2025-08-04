@@ -1780,27 +1780,45 @@ body:has(.restaurant-image.animating)::before {
 
 /* Swipe hint animation */
 .food-banner::after {
-    content: '';
+    content: '← Vuốt để chuyển món →';
     position: absolute;
-    bottom: 20px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    width: 40px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 2px;
-    animation: swipeHint 2s ease-in-out infinite;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+    animation: swipeHint 3s ease-in-out infinite;
+    pointer-events: none;
 }
 
 @keyframes swipeHint {
     0%, 100% {
-        transform: translateX(-50%) scaleX(1);
-        opacity: 0.5;
+        opacity: 0.6;
+        transform: translateX(-50%) scale(1);
     }
     50% {
-        transform: translateX(-50%) scaleX(1.5);
         opacity: 1;
+        transform: translateX(-50%) scale(1.05);
     }
+}
+
+/* Touch feedback */
+.food-banner.touching {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+.food-banner {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.2s ease;
+}
+
+.food-banner:active {
+    cursor: grabbing;
 }
 
 /* Collection view restaurant list */
