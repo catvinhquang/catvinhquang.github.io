@@ -280,9 +280,16 @@ function openRestaurantDetails(restaurantId, clickedElement = null) {
             <div class="menu-section">
                 <h2>Món nổi bật</h2>
                 <div class="menu-grid">
-                    ${restaurant.menu.map(item => `
-                        <div class="menu-item">
-                            <img src="${restaurant.image}" alt="${item.name}" onerror="this.src='https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'">
+                    ${restaurant.menu.map((item, index) => `
+                        <div class="menu-item" onclick="animateMenuItem(this, ${index})">
+                            <div class="menu-item-visual">
+                                <img src="${restaurant.image}" alt="${item.name}" class="menu-default-img" onerror="this.src='https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'">
+                                <div class="menu-plate">
+                                    <div class="menu-food">
+                                        <img src="${restaurant.image}" alt="${item.name}" onerror="this.src='https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop'">
+                                    </div>
+                                </div>
+                            </div>
                             <div class="menu-item-info">
                                 <div class="menu-item-name">${item.name}</div>
                                 <div class="menu-item-price">${item.price}</div>
@@ -762,8 +769,26 @@ function setupCollectionScrollIsolation(collectionView) {
     }, { passive: false });
 }
 
+// Menu item animation
+function animateMenuItem(element, index) {
+    // Don't animate if already animating
+    if (element.classList.contains('animating')) return;
+    
+    // Add animating class
+    element.classList.add('animating');
+    
+    // Remove animation class after animation completes
+    setTimeout(() => {
+        element.classList.remove('animating');
+    }, 1800); // Total animation duration
+    
+    // Optional: Log which menu item was clicked
+    console.log('Menu item clicked:', currentRestaurant?.menu[index]?.name);
+}
+
 // Make functions globally accessible
 window.openCollectionView = openCollectionView;
 window.closeCollectionView = closeCollectionView;
 window.openRestaurantDetails = openRestaurantDetails;
 window.closeRestaurantDetails = closeRestaurantDetails;
+window.animateMenuItem = animateMenuItem;
